@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #5cc7c2 0%, #8c9e3a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    /* ── Main grid: left col + right col ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Left column stacks greeting + timer + links */
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── Greeting card ── */
+    .greeting-card { text-align: center; }
+    .clock {
+      font-size: 3rem;
+      font-weight: 600;
+      color: #5cc7c2;
+      letter-spacing: 2px;
+    }
+    .date { font-size: 1rem; color: #555; margin: 4px 0 8px; }
+    .greeting { font-size: 1.5rem; font-weight: 700; color: #222; }
+
+    /* ── Focus Timer ── */
+    .timer-card { text-align: center; }
+    .timer-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; }
+    .timer-display {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #5cc7c2;
+      margin-bottom: 16px;
+    }
+    .timer-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 16px; }
+    .timer-controls button {
+      padding: 8px 22px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #btn-start { background: #5cc7c2; color: #fff; }
+    #btn-stop  { background: #e0e0e0; color: #333; }
+    #btn-reset { background: #e0e0e0; color: #333; }
+    .timer-setter { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; color: #555; }
+    .timer-setter input[type="range"] { width: 140px; accent-color: #5cc7c2; }
+    .timer-setter span { min-width: 32px; font-weight: 600; color: #5cc7c2; }
+
+    /* ── Tasks ── */
+    .tasks-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; }
+    .task-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .task-input-row input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1.5px solid #5cc7c2;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .task-input-row input::placeholder { color: #aaa; }
+    .btn-add {
+      padding: 9px 18px;
+      background: #5cc7c2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .task-list { display: flex; flex-direction: column; gap: 8px; }
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .task-item input[type="checkbox"] { accent-color: #5cc7c2; width: 16px; height: 16px; cursor: pointer; }
+    .task-item label { flex: 1; font-size: 0.95rem; color: #333; cursor: pointer; }
+    .task-item label.done { text-decoration: line-through; color: #aaa; }
+    .btn-delete {
+      padding: 5px 14px;
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ── Quick Links ── */
+    .links-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; }
+    .link-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .link-input-row input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .link-input-row input:focus { border-color: #5cc7c2; }
+    .btn-add-link {
+      padding: 9px 16px;
+      background: #5cc7c2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .link-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .link-chip { position: relative; display: inline-flex; align-items: center; }
+    .link-chip a {
+      display: inline-block;
+      padding: 9px 32px 9px 18px;
+      background: #5cc7c2;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .link-chip .remove-link {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.3);
+      border: none;
+      color: #fff;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="main-grid">
+
+      <!-- Left column: greeting + timer + links -->
+      <div class="left-col">
+
+        <!-- Greeting -->
+        <div class="card greeting-card">
+          <div class="clock" id="clock">00:00:00</div>
+          <div class="date" id="date"></div>
+          <div class="greeting" id="greeting"></div>
+        </div>
+
+        <!-- Focus Timer -->
+        <div class="card timer-card">
+          <h2>Focus Timer</h2>
+          <div class="timer-display" id="timer-display">25:00</div>
+          <div class="timer-controls">
+            <button id="btn-start">Start</button>
+            <button id="btn-stop">Stop</button>
+            <button id="btn-reset">Reset</button>
+          </div>
+          <div class="timer-setter">
+            <span>Set:</span>
+            <input type="range" id="timer-range" min="1" max="60" value="25" />
+            <span id="range-label">25 min</span>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card links-card">
+          <h2>Quick Links</h2>
+          <div class="link-input-row">
+            <input type="text" id="link-name" placeholder="Link name" />
+            <input type="text" id="link-url" placeholder="URL" />
+            <button class="btn-add-link" onclick="addLink()">Add Link</button>
+          </div>
+          <div class="link-grid" id="link-grid"></div>
+        </div>
+
+      </div>
+
+      <!-- Tasks (right column, full height) -->
+      <div class="card tasks-card">
+        <h2>Tasks</h2>
+        <div class="task-input-row">
+          <input type="text" id="task-input" placeholder="Add a new task..." onkeydown="if(event.key==='Enter') addTask()" />
+          <button class="btn-add" onclick="addTask()">Add</button>
+        </div>
+        <div class="task-list" id="task-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Clock & Greeting ──────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+
+      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('date').textContent =
+        `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+
+      const hour = now.getHours();
+      let greet = 'Good Evening';
+      if (hour >= 5 && hour < 12)  greet = 'Good Morning';
+      else if (hour >= 12 && hour < 17) greet = 'Good Afternoon';
+      document.getElementById('greeting').textContent = greet;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ── Focus Timer ───────────────────────────────────────────────
+    let timerMinutes = 25;
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let timerRunning = false;
+
+    const display = document.getElementById('timer-display');
+    const rangeInput = document.getElementById('timer-range');
+    const rangeLabel = document.getElementById('range-label');
+
+    function renderTimer() {
+      const m = String(timerMinutes).padStart(2, '0');
+      const s = String(timerSeconds).padStart(2, '0');
+      display.textContent = `${m}:${s}`;
+    }
+
+    rangeInput.addEventListener('input', () => {
+      if (timerRunning) return;
+      timerMinutes = parseInt(rangeInput.value);
+      timerSeconds = 0;
+      rangeLabel.textContent = `${timerMinutes} min`;
+      renderTimer();
+    });
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      if (timerRunning) return;
+      timerRunning = true;
+      timerInterval = setInterval(() => {
+        if (timerSeconds === 0) {
+          if (timerMinutes === 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            return;
+          }
+          timerMinutes--;
+          timerSeconds = 59;
+        } else {
+          timerSeconds--;
+        }
+        renderTimer();
+      }, 1000);
+    });
+
+    document.getElementById('btn-stop').addEventListener('click', () => {
+      clearInterval(timerInterval);
+      timerRunning = false;
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerMinutes = parseInt(rangeInput.value);
+      timerSeconds = 0;
+      renderTimer();
+    });
+
+    // ── Tasks ─────────────────────────────────────────────────────
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+    function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
+
+    function renderTasks() {
+      const list = document.getElementById('task-list');
+      list.innerHTML = '';
+      tasks.forEach((task, i) => {
+        const id = `task-${i}`;
+        const item = document.createElement('div');
+        item.className = 'task-item';
+        item.innerHTML = `
+          <input type="checkbox" id="${id}" ${task.done ? 'checked' : ''} onchange="toggleTask(${i})" />
+          <label for="${id}" class="${task.done ? 'done' : ''}">${task.text}</label>
+          <button class="btn-delete" onclick="deleteTask(${i})">Delete</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function addTask() {
+      const input = document.getElementById('task-input');
+      const text = input.value.trim();
+      if (!text) return;
+      tasks.push({ text, done: false });
+      saveTasks();
+      renderTasks();
+      input.value = '';
+    }
+
+    function deleteTask(i) {
+      tasks.splice(i, 1);
+      saveTasks();
+      renderTasks();
+    }
+
+    function toggleTask(i) {
+      tasks[i].done = !tasks[i].done;
+      saveTasks();
+      renderTasks();
+    }
+
+    renderTasks();
+
+    // ── Quick Links ───────────────────────────────────────────────
+    let links = JSON.parse(localStorage.getItem('links') || '[{"name":"Google","url":"https://google.com"},{"name":"Gmail","url":"https://mail.google.com"},{"name":"Calendar","url":"https://calendar.google.com"}]');
+
+    function saveLinks() { localStorage.setItem('links', JSON.stringify(links)); }
+
+    function renderLinks() {
+      const grid = document.getElementById('link-grid');
+      grid.innerHTML = '';
+      links.forEach((link, i) => {
+        const chip = document.createElement('div');
+        chip.className = 'link-chip';
+        const href = link.url.startsWith('http') ? link.url : 'https://' + link.url;
+        chip.innerHTML = `
+          <a href="${href}" target="_blank" rel="noopener">${link.name}</a>
+          <button class="remove-link" onclick="removeLink(${i})" title="Remove">✕</button>
+        `;
+        grid.appendChild(chip);
+      });
+    }
+
+    function addLink() {
+      const name = document.getElementById('link-name').value.trim();
+      const url  = document.getElementById('link-url').value.trim();
+      if (!name || !url) return;
+      links.push({ name, url });
+      saveLinks();
+      renderLinks();
+      document.getElementById('link-name').value = '';
+      document.getElementById('link-url').value = '';
+    }
+
+    function removeLink(i) {
+      links.splice(i, 1);
+      saveLinks();
+      renderLinks();
+    }
+
+    renderLinks();
+  </script>
+</body>
+</html>
